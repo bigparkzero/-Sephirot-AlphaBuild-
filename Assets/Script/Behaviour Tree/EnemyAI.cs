@@ -10,6 +10,7 @@ public class EnemyAI : MonoBehaviour
     public float detectionRange;
     public float attackRange;
     public float attackRangeNear;
+    public float waitTimeBeforeAttack;
 
     private Collider playerCollider;
     private Node _behaviorTree;
@@ -35,6 +36,7 @@ public class EnemyAI : MonoBehaviour
             }),
             new Sequence(new List<Node> {
                 new Condition(() => PlayerInAttackRange()),
+                new WaitNode(waitTimeBeforeAttack),
                 new ActionNode(() => AttackPlayer()),
             }),
             new Sequence(new List<Node> {
@@ -87,7 +89,6 @@ public class EnemyAI : MonoBehaviour
             return false;
         }
     }
-
     private void ChasePlayer()
     {
         if (playerCollider != null)
@@ -97,7 +98,6 @@ public class EnemyAI : MonoBehaviour
             navMeshAgent.updateRotation = true;
         }
     }
-   
     private bool PlayerInAttackRange()
     {
         if (playerCollider == null)
@@ -109,7 +109,6 @@ public class EnemyAI : MonoBehaviour
         float distanceToPlayer = Vector3.Distance(transform.position, playerCollider.transform.position);
         return distanceToPlayer <= attackRange;
     }
-    
     private void AttackPlayer()
     {
         // 플레이어 공격 로직 (예: 애니메이션 재생, 피해 입히기 등)

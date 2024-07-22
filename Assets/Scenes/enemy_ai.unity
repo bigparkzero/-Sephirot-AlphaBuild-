@@ -1450,6 +1450,7 @@ MonoBehaviour:
   detectionRange: 10
   attackRange: 4
   attackRangeNear: 3.37
+  waitTimeBeforeAttack: 4
 --- !u!195 &1458493119
 NavMeshAgent:
   m_ObjectHideFlags: 0

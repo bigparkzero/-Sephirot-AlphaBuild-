@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 // 기본 노드 클래스
 public abstract class Node
@@ -88,9 +89,40 @@ public class ActionNode : Node
     }
 }
 
+
+// 대기 노드 (WaitNode)
+public class WaitNode : Node
+{
+    private float waitTime;
+    private float startTime;
+
+    public WaitNode(float time)
+    {
+        waitTime = time;
+    }
+
+    public override NodeState Tick()
+    {
+        if (startTime == 0)
+        {
+            startTime = Time.time;
+        }
+
+        if (Time.time - startTime >= waitTime)
+        {
+            startTime = 0; // Reset start time for next Tick
+            return NodeState.Success;
+        }
+
+        return NodeState.Running;
+    }
+}
+
+
 // 노드 상태
 public enum NodeState
 {
     Success,
-    Failure
+    Failure,
+    Running
 }
