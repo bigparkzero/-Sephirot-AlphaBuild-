@@ -1447,10 +1447,11 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
-  detectionRange: 10
-  attackRange: 4
-  attackRangeNear: 3.37
+  detectionRange: 26.6
+  attackRange: 7.51
+  attackRangeNear: 5.73
   waitTimeBeforeAttack: 4
+  skills: []
 --- !u!195 &1458493119
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1473,6 +1474,21 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &1458493122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1458493115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07c31dd8246371d4eab8d54e43ebe45f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hp: 100
+  maxHP: 0
+  slider_hpBar: {fileID: 0}
 --- !u!4 &1676639334 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5234998096932417629, guid: 06aef2394ac78384fa3fe8dcc1e712d1,
@@ -1540,17 +1556,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 7a039997cce7cf743a6e610fc0225438,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -5.19
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7a039997cce7cf743a6e610fc0225438,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.0000009536743
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7a039997cce7cf743a6e610fc0225438,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 24.52
+      value: 36.7
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7a039997cce7cf743a6e610fc0225438,
         type: 3}
@@ -2610,6 +2626,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1458493118}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7a039997cce7cf743a6e610fc0225438,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1458493122}
   m_SourcePrefab: {fileID: 100100000, guid: 7a039997cce7cf743a6e610fc0225438, type: 3}
 --- !u!4 &1750698200 stripped
 Transform:

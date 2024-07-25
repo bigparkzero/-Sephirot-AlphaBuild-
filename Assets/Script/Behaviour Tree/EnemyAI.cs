@@ -3,6 +3,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using UnityEngine.AI;
+using UnityEditor.Experimental.GraphView;
+using System.Collections;
 
 public class EnemyAI : MonoBehaviour
 {
@@ -15,11 +17,16 @@ public class EnemyAI : MonoBehaviour
     private Collider playerCollider;
     private Node _behaviorTree;
     private NavMeshAgent navMeshAgent;
+    private Stats enemystats;
+
+   public List<EnemySkill> skills = new List<EnemySkill>();
+
 
     void Start()
     {
         _behaviorTree = InitializeBehaviorTree();
         navMeshAgent = GetComponent<NavMeshAgent>();
+        enemystats= GetComponent<Stats>();
     }
 
     void Update()
@@ -30,21 +37,92 @@ public class EnemyAI : MonoBehaviour
     private Node InitializeBehaviorTree()
     {
         return new Selector(new List<Node> {
-            new Sequence(new List<Node> {
-                new Condition(() => PlayerInAttackRangeNear()),
-                new ActionNode(() => Retreat()),
+            new Sequence(new List<Node> { // 사망 시퀀스
+                new Condition(() => IsDead()),
+                new ActionNode(() => DeathProcessing()),
             }),
-            new Sequence(new List<Node> {
+            new Sequence(new List<Node> { // 경직 시퀀스
                 new Condition(() => PlayerInAttackRange()),
+                new ActionNode(() => AttackCancellation()),
                 new WaitNode(waitTimeBeforeAttack),
-                new ActionNode(() => AttackPlayer()),
             }),
-            new Sequence(new List<Node> {
-                new Condition(() => PlayerInDetectionRange()),
-                new ActionNode(() => ChasePlayer()),
+            new Condition(() => CheckAttacking()), // 공격중? 컨디션
+
+            new Sequence(new List<Node> { // 이동 시퀀스
+                new Condition(() => AttackRangeDetection() && SkillAvailable()), 
+                new Selector(new List<Node>{
+                    new Sequence(new List<Node>
+                    {
+                        new Condition(() => !AttackRangeDetection()),
+                        new ActionNode(() => Chasing()),
+                    }),
+                    new Sequence(new List<Node>
+                    {
+                        new Condition(() => AttackRangeDetection()),
+                        new ActionNode(() => CombatMove()),
+                    })
+                }),
+            }),
+            new Sequence(new List<Node> { // 공격 시퀀스
+                new Condition(() => SkillAvailable()),
+                new ActionNode(() => SkillActivation())
+            }),
+            new Sequence(new List<Node> { // 감지 시퀀스
+                new Condition(() => BattleTrigger()),
+                new ActionNode(() => BattleStart()),
             }),
         });
     }
+    private bool IsDead() // 사망?
+    {
+        return enemystats.HP <= 0;
+    }
+
+    private void DeathProcessing() // 사망처리
+    { 
+    //사망 로직 구현
+    }
+    private bool PlayerInAttackRange()
+    { 
+    return true;
+    }
+    private void AttackCancellation()
+    { 
+      // 공격 취소 피격 판정
+    }
+    private bool CheckAttacking()
+    {
+        return true;
+    }
+
+    private void Chasing()
+    { 
+    }
+    private void CombatMove()
+    { 
+    }
+
+    private bool SkillAvailable()
+    {
+        return true;
+    }
+    private void SkillActivation()
+    { 
+    }
+    private bool AttackRangeDetection()
+    {
+        return true;
+    }
+
+    private bool BattleTrigger()
+    {
+        return true;
+    }
+    private void BattleStart()
+    { 
+    }
+
+    /*
     private void Retreat()
     {
         if (playerCollider != null)
@@ -58,6 +136,7 @@ public class EnemyAI : MonoBehaviour
             navMeshAgent.updateRotation = false;
         }
     }
+    
     private bool PlayerInAttackRangeNear()
     {
         if (playerCollider == null)
@@ -114,7 +193,7 @@ public class EnemyAI : MonoBehaviour
         // 플레이어 공격 로직 (예: 애니메이션 재생, 피해 입히기 등)
         Debug.Log("Attacking Player!");
     }
-
+    */
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.blue; // 감지 범위의 색상
