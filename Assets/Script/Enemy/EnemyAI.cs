@@ -1,36 +1,45 @@
-// EnemyAI.cs
 using UnityEngine;
 using System.Collections.Generic;
-using System;
 using UnityEngine.AI;
-using UnityEditor.Experimental.GraphView;
-using System.Collections;
 
 public class EnemyAI : MonoBehaviour
 {
-    public LayerMask playerLayer;
-    public float detectionRange;
-    public float attackRange;
-    public float attackRangeNear;
-    public float waitTimeBeforeAttack;
+    public EnemyGeneralState GeneralState;
+
+    private Vector3 detectplayer;
+    private Vector3 originPos;
 
     private Collider playerCollider;
     private Node _behaviorTree;
     private NavMeshAgent navMeshAgent;
     private Stats enemystats;
+    private Animator an;
 
    public List<EnemySkill> skills = new List<EnemySkill>();
-
+    private void AnimatorSetUp()
+    { 
+        for (int i = 0; i < skills.Count; i++) 
+        {
+            skills[i].GetAnimation();
+        }
+        originPos = transform.position;
+    }
 
     void Start()
     {
         _behaviorTree = InitializeBehaviorTree();
         navMeshAgent = GetComponent<NavMeshAgent>();
         enemystats= GetComponent<Stats>();
-    }
+        an = GetComponent<Animator>();
 
+    }
+    
     void Update()
     {
+        for (int i = 0; i < skills.Count; i++)
+        {
+            skills[i].TimeUpdate();
+        }
         _behaviorTree.Tick();
     }
 
@@ -42,34 +51,54 @@ public class EnemyAI : MonoBehaviour
                 new ActionNode(() => DeathProcessing()),
             }),
             new Sequence(new List<Node> { // 경직 시퀀스
-                new Condition(() => PlayerInAttackRange()),
+                new Condition(() => hitdetect()),
                 new ActionNode(() => AttackCancellation()),
-                new WaitNode(waitTimeBeforeAttack),
+                new WaitNode(GeneralState.waitTimeBeforeAttack),
             }),
             new Condition(() => CheckAttacking()), // 공격중? 컨디션
 
-            new Sequence(new List<Node> { // 이동 시퀀스
-                new Condition(() => AttackRangeDetection() && SkillAvailable()), 
-                new Selector(new List<Node>{
-                    new Sequence(new List<Node>
-                    {
-                        new Condition(() => !AttackRangeDetection()),
-                        new ActionNode(() => Chasing()),
-                    }),
-                    new Sequence(new List<Node>
-                    {
-                        new Condition(() => AttackRangeDetection()),
-                        new ActionNode(() => CombatMove()),
-                    })
-                }),
-            }),
+            new Sequence
+            (
+                new List<Node> 
+                { // 이동 시퀀스
+                
+                    new Condition(() => SkillAvailable()), 
+                    new Selector
+                    (
+                        new List<Node>
+                        {
+                            new Sequence
+                            (
+                                new List<Node>
+                                {
+                                    new Condition(() => detectRange(GeneralState.detectionRange)),
+                                    new ActionNode(() => SetTargetPos(detectplayer)),
+                                }
+                            ),
+                            new Sequence
+                            (
+                                new List<Node>
+                                {
+                                    new Condition(() => detectRange(GeneralState.attackRange)),
+                                    new ActionNode(() => CombatMove()),
+                                }
+                            )
+
+                        }
+
+                    ),
+            
+                }
+            ),
             new Sequence(new List<Node> { // 공격 시퀀스
                 new Condition(() => SkillAvailable()),
                 new ActionNode(() => SkillActivation())
             }),
             new Sequence(new List<Node> { // 감지 시퀀스
-                new Condition(() => BattleTrigger()),
-                new ActionNode(() => BattleStart()),
+                new Condition(() => detectRange(GeneralState.detectionRange)),
+                new ActionNode(() => SetTargetPos(detectplayer)),
+                new Condition(() => !detectRange(GeneralState.detectionRange)),
+                new ActionNode(() => SetTargetPos(originPos)),
             }),
         });
     }
@@ -79,12 +108,26 @@ public class EnemyAI : MonoBehaviour
     }
 
     private void DeathProcessing() // 사망처리
-    { 
-    //사망 로직 구현
+    {
+
+        Debug.Log("사망처리");
     }
-    private bool PlayerInAttackRange()
-    { 
-    return true;
+
+    private bool hitdetect()
+    {
+        return false;
+    }
+    private bool detectRange(float range)
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, range, GeneralState.playerLayer);
+
+        for (int i = 0; hitColliders.Length > i; i++) 
+        {
+            detectplayer = hitColliders[i].transform.position;
+            return true;
+        }
+        detectplayer = originPos;
+        return false;
     }
     private void AttackCancellation()
     { 
@@ -92,14 +135,17 @@ public class EnemyAI : MonoBehaviour
     }
     private bool CheckAttacking()
     {
-        return true;
+        return false;
     }
-
-    private void Chasing()
-    { 
+    private void SetTargetPos(Vector3 target)
+    {
+        navMeshAgent.SetDestination(target);
+        Debug.Log("SetTargetPos " + target);
+        navMeshAgent.updateRotation = true;
     }
     private void CombatMove()
-    { 
+    {
+        navMeshAgent.updateRotation = false;
     }
 
     private bool SkillAvailable()
@@ -108,15 +154,6 @@ public class EnemyAI : MonoBehaviour
     }
     private void SkillActivation()
     { 
-    }
-    private bool AttackRangeDetection()
-    {
-        return true;
-    }
-
-    private bool BattleTrigger()
-    {
-        return true;
     }
     private void BattleStart()
     { 
@@ -197,10 +234,10 @@ public class EnemyAI : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.blue; // 감지 범위의 색상
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, attackRangeNear);
+        Gizmos.DrawWireSphere(transform.position, GeneralState.detectionRange);
+        Gizmos.color = Color.red; // 최대 공격 범위의 색상
+        Gizmos.DrawWireSphere(transform.position, GeneralState.attackRange);
+        Gizmos.color = Color.yellow; // 최소 공격 범위의 색상
+        Gizmos.DrawWireSphere(transform.position, GeneralState.attackRangeNear);
     }
 }
