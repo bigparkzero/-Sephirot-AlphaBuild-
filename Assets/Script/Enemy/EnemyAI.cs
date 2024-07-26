@@ -8,6 +8,7 @@ public class EnemyAI : MonoBehaviour
 
     private Vector3 detectplayer;
     private Vector3 originPos;
+    private List<EnemySkill> AvailableSkills;
 
     private Collider playerCollider;
     private Node _behaviorTree;
@@ -20,7 +21,7 @@ public class EnemyAI : MonoBehaviour
     { 
         for (int i = 0; i < skills.Count; i++) 
         {
-            skills[i].GetAnimation();
+            
         }
         originPos = transform.position;
     }
@@ -63,31 +64,17 @@ public class EnemyAI : MonoBehaviour
                 { // ÀÌµ¿ ½ÃÄö½º
                 
                     new Condition(() => SkillAvailable()), 
-                    new Selector
-                    (
-                        new List<Node>
+                    new Selector(new List<Node>{
+                        new Sequence(new List<Node>
                         {
-                            new Sequence
-                            (
-                                new List<Node>
-                                {
-                                    new Condition(() => detectRange(GeneralState.detectionRange)),
-                                    new ActionNode(() => SetTargetPos(detectplayer)),
-                                }
-                            ),
-                            new Sequence
-                            (
-                                new List<Node>
-                                {
-                                    new Condition(() => detectRange(GeneralState.attackRange)),
-                                    new ActionNode(() => CombatMove()),
-                                }
-                            )
-
-                        }
-
-                    ),
-            
+                            new Condition(() => detectRange(GeneralState.attackRange)),
+                            new ActionNode(() => CombatMove()),
+                        }),
+                        new Sequence(new List<Node>{
+                            new Condition(() => detectRange(GeneralState.detectionRange)),
+                            new ActionNode(() => SetTargetPos(detectplayer)),
+                        }),
+                    }),
                 }
             ),
             new Sequence(new List<Node> { // °ø°Ý ½ÃÄö½º
@@ -127,6 +114,7 @@ public class EnemyAI : MonoBehaviour
             return true;
         }
         detectplayer = originPos;
+        
         return false;
     }
     private void AttackCancellation()
@@ -146,17 +134,44 @@ public class EnemyAI : MonoBehaviour
     private void CombatMove()
     {
         navMeshAgent.updateRotation = false;
+
     }
 
     private bool SkillAvailable()
     {
-        return true;
+        for (int i = 0; i < skills.Count; i++)
+        {
+            if (skills[i].cooltimeTimer_debug > skills[i].coolTime)
+            {
+                AvailableSkills.Add(skills[i]);
+            }
+        }
+        if (AvailableSkills.Count <= 0)
+        {
+            AvailableSkills.Clear();
+            return false;
+        }
+        else
+        {
+            AvailableSkills.Clear();
+            return true;
+        }
     }
     private void SkillActivation()
-    { 
+    {
+        if (AvailableSkills.Count <= 1)
+        {
+            AvailableSkills[0].UseSkill();
+        }
+        else
+        {
+            AvailableSkills[0].UseSkill();
+        }
+        Debug.Log("wwa;iufw;uwaf");
     }
     private void BattleStart()
-    { 
+    {
+
     }
 
     /*

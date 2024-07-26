@@ -7,6 +7,7 @@ using UnityEngine;
     public float coolTime;
     public float cooltimeTimer_debug;
     public float damage;
+    public Animation attackAnimation;
 
     public GameObject attackEffect;
     public void TimeUpdate()
@@ -14,5 +15,4 @@ using UnityEngine;
         cooltimeTimer_debug += Time.deltaTime;
     }
     public abstract void UseSkill();
-    public abstract Animation GetAnimation();
 }

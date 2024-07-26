@@ -5,12 +5,10 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Nomal Skill", menuName = "Scriptable Object/Enemy/Enemy Skill/Nomal Skill")]
 public class Nomal_Attack : EnemySkill
 {
+
     public override void UseSkill()
     {
-        throw new System.NotImplementedException();
+        Debug.Log("Nomal_Attack");
     }
-    public override Animation GetAnimation()
-    {
-        throw new System.NotImplementedException();
-    }
+   
 }
