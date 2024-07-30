@@ -12,8 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62054b8027bd4094e9ef8d4f25b85121, type: 3}
   m_Name: Nomal Skill
   m_EditorClassIdentifier: 
-  coolTime: 1
-  cooltimeTimer_debug: 0
+  coolTime: 3
+  cooltimeTimer_debug: 0.24379057
   damage: 10
   attackAnimation: {fileID: 0}
   attackEffect: {fileID: 0}
+  skillUsage: 1
+  testskillusagetime: 3

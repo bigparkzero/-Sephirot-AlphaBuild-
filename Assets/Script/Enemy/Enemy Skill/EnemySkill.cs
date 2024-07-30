@@ -10,9 +10,23 @@ using UnityEngine;
     public Animation attackAnimation;
 
     public GameObject attackEffect;
+
+    public bool skillUsage;
+    public float testskillusagetime;
     public void TimeUpdate()
     {
         cooltimeTimer_debug += Time.deltaTime;
     }
-    public abstract void UseSkill();
+    public bool SkillAvailable()
+    {
+        if (cooltimeTimer_debug >= coolTime)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    public abstract void UseSkill(MonoBehaviour monoBehaviour);
 }

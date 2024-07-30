@@ -8,7 +8,6 @@ public class EnemyAI : MonoBehaviour
 
     private Vector3 detectplayer;
     private Vector3 originPos;
-    private List<EnemySkill> AvailableSkills;
 
     private Collider playerCollider;
     private Node _behaviorTree;
@@ -17,6 +16,7 @@ public class EnemyAI : MonoBehaviour
     private Animator an;
 
    public List<EnemySkill> skills = new List<EnemySkill>();
+    public List<EnemySkill> availableSkills = new List<EnemySkill>();
     private void AnimatorSetUp()
     { 
         for (int i = 0; i < skills.Count; i++) 
@@ -57,17 +57,18 @@ public class EnemyAI : MonoBehaviour
                 new WaitNode(GeneralState.waitTimeBeforeAttack),
             }),
             new Condition(() => CheckAttacking()), // 공격중? 컨디션
-
+            new Sequence(new List<Node> { // 공격 시퀀스
+                new Condition(() => SkillAvailable() && detectRange(GeneralState.attackRange)),
+                new ActionNode(() => SkillActivation())
+            }),
             new Sequence
             (
                 new List<Node> 
                 { // 이동 시퀀스
-                
-                    new Condition(() => SkillAvailable()), 
                     new Selector(new List<Node>{
                         new Sequence(new List<Node>
                         {
-                            new Condition(() => detectRange(GeneralState.attackRange)),
+                            new Condition(() => detectRange(GeneralState.attackRangeNear)),
                             new ActionNode(() => CombatMove()),
                         }),
                         new Sequence(new List<Node>{
@@ -77,16 +78,14 @@ public class EnemyAI : MonoBehaviour
                     }),
                 }
             ),
-            new Sequence(new List<Node> { // 공격 시퀀스
-                new Condition(() => SkillAvailable()),
-                new ActionNode(() => SkillActivation())
-            }),
+            /*
             new Sequence(new List<Node> { // 감지 시퀀스
                 new Condition(() => detectRange(GeneralState.detectionRange)),
                 new ActionNode(() => SetTargetPos(detectplayer)),
                 new Condition(() => !detectRange(GeneralState.detectionRange)),
                 new ActionNode(() => SetTargetPos(originPos)),
             }),
+            */
         });
     }
     private bool IsDead() // 사망?
@@ -127,47 +126,35 @@ public class EnemyAI : MonoBehaviour
     }
     private void SetTargetPos(Vector3 target)
     {
+        navMeshAgent.isStopped = false;
         navMeshAgent.SetDestination(target);
-        Debug.Log("SetTargetPos " + target);
         navMeshAgent.updateRotation = true;
     }
     private void CombatMove()
     {
         navMeshAgent.updateRotation = false;
-
+        navMeshAgent.SetDestination(-detectplayer);
     }
 
     private bool SkillAvailable()
     {
         for (int i = 0; i < skills.Count; i++)
         {
-            if (skills[i].cooltimeTimer_debug > skills[i].coolTime)
-            {
-                AvailableSkills.Add(skills[i]);
-            }
+            return skills[i].SkillAvailable();
         }
-        if (AvailableSkills.Count <= 0)
-        {
-            AvailableSkills.Clear();
-            return false;
-        }
-        else
-        {
-            AvailableSkills.Clear();
-            return true;
-        }
+        return false;
     }
     private void SkillActivation()
     {
-        if (AvailableSkills.Count <= 1)
+        navMeshAgent.isStopped = true;
+        for (int i = 0; i < skills.Count; i++)
         {
-            AvailableSkills[0].UseSkill();
+            if (skills[i].SkillAvailable())
+            {
+                availableSkills.Add(skills[i]);
+            }
         }
-        else
-        {
-            AvailableSkills[0].UseSkill();
-        }
-        Debug.Log("wwa;iufw;uwaf");
+        availableSkills[Random.Range(0, availableSkills.Count)].UseSkill(this);
     }
     private void BattleStart()
     {

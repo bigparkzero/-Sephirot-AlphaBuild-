@@ -5,10 +5,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Nomal Skill", menuName = "Scriptable Object/Enemy/Enemy Skill/Nomal Skill")]
 public class Nomal_Attack : EnemySkill
 {
-
-    public override void UseSkill()
+    public override void UseSkill(MonoBehaviour monoBehaviour)
     {
-        Debug.Log("Nomal_Attack");
+        cooltimeTimer_debug = 0;
+        Debug.Log("nomal skill use");
     }
-   
 }

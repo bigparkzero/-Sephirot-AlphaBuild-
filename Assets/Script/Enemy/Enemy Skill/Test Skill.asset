@@ -17,3 +17,5 @@ MonoBehaviour:
   damage: 2
   attackAnimation: {fileID: 0}
   attackEffect: {fileID: 0}
+  skillUsage: 0
+  testskillusagetime: 3
